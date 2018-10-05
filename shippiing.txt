@@ -1,0 +1,332 @@
+              <engine:bind name="SPRICE">
+                  <engine:applyFilter name="filter0">
+                       <xsl:choose> 
+                               <xsl:when test=".//div[@class='product-type-data']/div[@class='price-box']/span[@class='regular-price']/span/text()">
+                                       <xsl:value-of select=".//div[@class='product-type-data']/div[@class='price-box']/span[@class='regular-price']/span/text()"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                      <xsl:value-of select=".//div[@class='product-type-data']/div[@class='price-box']/p[@class='special-price']/span[@class='price']/text()"/>
+                                </xsl:otherwise>
+                      </xsl:choose>
+                 </engine:applyFilter>
+             </engine:bind>
+
+         <engine:bind name="SCOST">
+              <engine:applyFilter name="filter0">
+                      <xsl:value-of select="engine:matches('\d+', .//div[@class='block_product_secondary_bottom']/div[@class='feature indent']/p/text()[contains(.,'Free shipping')])"/>
+              </engine:applyFilter>
+           </engine:bind>
+
+           <ShippingCost Currency=" ">
+                  <xsl:if test="number(engine:matches('(^\d+)', engine:insert('SPRICE')))>number(engine:insert('SCOST'))">
+                      <xsl:value-of select="number(00.00)"/>
+                   </xsl:if>
+            </ShippingCost>
+
+=========================================================================================================================================
+
+   <xsl:variable name="productPRICE">
+                <engine:applyFilter name="filter0">
+                      <xsl:choose>
+                          <xsl:when test=".//div[@class='price-wrapper']/span[@class='price']/span[@class='woocommerce-Price-amount amount'][./span/text()[contains(.,'DKK')]]/text()">
+                              <xsl:value-of select=".//div[@class='price-wrapper']/span[@class='price']/span[@class='woocommerce-Price-amount amount'][./span/text()[contains(.,'DKK')]]/text()"/>
+                          </xsl:when>
+                          <xsl:otherwise>
+                         <xsl:value-of select=".//div[@class='price-wrapper']/span[@class='price']/ins/span[@class='woocommerce-Price-amount amount'][./span/text()[contains(.,'DKK')]]/text()"/>
+                          </xsl:otherwise>
+                      </xsl:choose>
+               </engine:applyFilter>
+              </xsl:variable>
+
+            <xsl:variable name="SippingCOST">
+              <engine:applyFilter name="filter0">
+                <xsl:value-of select="engine:matches('\d+', //div[@class='flex-row container']/div/ul/li/text()[contains(.,'GRATIS FRAGT FRA')])"/>
+             </engine:applyFilter>
+            </xsl:variable>
+
+  <ShippingCost Currency="DKK">
+                     <xsl:if test="number($productPRICE) &gt; number($SippingCOST)">
+                        <xsl:value-of select="number(00.00)"/>
+                     </xsl:if>
+                    </ShippingCost>
+              </ShippingOption>
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- <ShippingOption>
+                    <xsl:if test="contains(engine:insert('lt'),'days') and contains(engine:insert('lt'),'-')">
+                        <LeadTime From="order" To="delivery">
+                            <LeadTimeMin Unit="days">
+                                <xsl:value-of select="engine:matches('(\d+)[\s]*-[\s]*\d+',engine:insert('lt'))"/>
+                            </LeadTimeMin>
+                            <LeadTimeMax Unit="days">
+                                <xsl:value-of select="engine:matches('\d+[\s]*-[\s]*(\d+)',engine:insert('lt'))"/>
+                            </LeadTimeMax>
+                        </LeadTime>
+                    </xsl:if>
+                    <xsl:if test="contains(engine:insert('lt'),'days') and not(contains(engine:insert('lt'),'-'))">
+                        <LeadTime From="order" To="delivery">
+                            <LeadTimeExact Unit="days">
+                                <xsl:value-of select="engine:matches('(\d+)',engine:insert('lt'))"/>
+                            </LeadTimeExact>
+                        </LeadTime>
+                    </xsl:if>
+                </ShippingOption>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   <engine:bind name="scost">
+               <xsl:value-of select="engine:matches('ved.(\d+)',.//div[@class='grid text-center']/span/text()[contains(.,'Gratis ved')])"/>
+          </engine:bind>
+
+         <engine:bind name="sprice">
+               <xsl:value-of select="engine:matches('fra.(\d+)',.//div[@class='grid text-center']/span/text()[contains(.,'Gratis ved')])"/>
+          </engine:bind>
+      
+     <engine:applyFilter name="filter0">
+                      <xsl:choose>
+                          <xsl:when test="number(engine:matches('(^\d+)', engine:insert('SPRICE')))>number(engine:insert('SCOST'))">
+                           <xsl:value-of select="number(00.00)"/>
+                          </xsl:when>
+                          <xsl:otherwise>
+                              <xsl:value-of select=".//div[@class='onsale']/text()"/>
+                          </xsl:otherwise>
+                      </xsl:choose>
+                  </engine:applyFilter>
+              </Price>
+__________________________________________________________________________________________________________________________________________________________
+
+<engine:bind name="shippingCost">
+      <engine:applyFilter name="filter1">
+                  <xsl:value-of select=".//strong[@class='product-delivery-details-title']/text()[contains(.,'Delivery')]"/>
+      </engine:applyFilter>      
+</engine:bind>
+
+
+                    <ShippingCost Currency="EUR">
+                            <xsl:value-of select="engine:insert('shippingCost')"/>
+                    </ShippingCost>
+              </ShippingOption>
+           </Region>
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                   <ShippingCost Currency="SEK">
+                        <engine:applyFilter name="filter1">
+                            <xsl:value-of select="engine:matches('Frakt: SEK.(\d+.*)',engine:insert('shipping'))"/>
+                        </engine:applyFilter>
+                    </ShippingCost>
+              </ShippingOption>
+
+  <engine:bind name="shipping">
+                    <xsl:choose>
+                          <xsl:when test=".//div[@class='meta']//strong/text()[contains(.,'Frakt')]">
+                                  <xsl:value-of select=".//div[@class='meta']//strong/text()[contains(.,'Frakt')]"/>
+                          </xsl:when>
+                          <xsl:otherwise>
+                                  <xsl:value-of select=".//div[@class='categories lineheight30']//strong/text()[contains(.,'Frakt')]"/>
+                          </xsl:otherwise>
+                      </xsl:choose>
+              </engine:bind>
+
+_____________________________________________________________________________________________________________________________________________________________
+Days and weeks
+                  <engine:applyFilter name="filter0">
+                      <xsl:choose>
+                          <xsl:when test=".//div[@class='priceDiv']/span[@class='discount']/text()">
+                              <xsl:value-of select=".//div[@class='priceDiv']/span[@class='discount']/text()"/>
+                          </xsl:when>
+                          <xsl:otherwise>
+                              <xsl:value-of select=".//div[@class='priceDiv']/span[@class='price']/text()"/>
+                          </xsl:otherwise>
+                      </xsl:choose>
+                  </engine:applyFilter>
+              </Price>
+
+ <xsl:variable name="delivery"><xsl:value-of select="engine:insert('dtime')"/></xsl:variable>
+              <ShippingOption>
+                  <xsl:if test="contains($delivery, '-')">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeMin Unit="weeks">
+                              <xsl:value-of select="engine:matches('(\d+)[\s]?-[\s]?\d+', $delivery)"/>
+                          </LeadTimeMin>
+                          <LeadTimeMax Unit="weeks">
+                              <xsl:value-of select="engine:matches('\d+[\s]?-[\s]?(\d+)', $delivery)"/>
+                          </LeadTimeMax>
+                      </LeadTime>
+                  </xsl:if>
+                  <xsl:if test="not(contains($delivery, '-')) and $delivery!=''">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeExact Unit="weeks">
+                              <xsl:value-of select="engine:matches('(\d+)',$delivery)"/>
+                          </LeadTimeExact>
+                      </LeadTime>
+                    </xsl:if>
+
+            <xsl:variable name="delivery1"><xsl:value-of select="engine:insert('dtime1')"/></xsl:variable>
+
+                 <xsl:if test="contains($delivery1, '-')">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeMin Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)[\s]?-[\s]?\d+', $delivery1)"/>
+                          </LeadTimeMin>
+                          <LeadTimeMax Unit="days">
+                              <xsl:value-of select="engine:matches('\d+[\s]?-[\s]?(\d+)', $delivery1)"/>
+                          </LeadTimeMax>
+                      </LeadTime>
+                  </xsl:if>
+                  <xsl:if test="not(contains($delivery1, '-')) and $delivery1!=''">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeExact Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)',$delivery1)"/>
+                          </LeadTimeExact>
+                      </LeadTime>
+                    </xsl:if>
+                         ||
+                         ||
+                  </ShippingOption>
+
+
+         <engine:bind name="dtime">
+                  <xsl:value-of select=".//div[@class='stockInfo']/span/text()[contains(.,'Beställningsvara')]"/>
+         </engine:bind>
+
+         <engine:bind name="dtime1">
+                  <xsl:value-of select=".//div[@class='stockInfo']/span/text()[contains(.,'Leveranstid')]"/>
+         </engine:bind>
+______________________________________________________________________________________________________________________________________________________
+ <xsl:variable name="delivery">
+                       <xsl:value-of select="engine:insert('dtime')"/>
+             </xsl:variable>
+
+              <ShippingOption>
+                  
+                  <xsl:if test="contains($delivery, '-')">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeMin Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)[\s]?-[\s]?\d+', $delivery)"/>
+                          </LeadTimeMin>
+                          <LeadTimeMax Unit="days">
+                              <xsl:value-of select="engine:matches('\d+[\s]?-[\s]?(\d+)', $delivery)"/>
+                          </LeadTimeMax>
+                      </LeadTime>
+                  </xsl:if>
+                  <xsl:if test="not(contains($delivery, '-')) and $delivery!=''">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeExact Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)',$delivery)"/>
+                          </LeadTimeExact>
+                      </LeadTime>
+                    </xsl:if>
+
+    <engine:bind name="dtime">
+                    <xsl:choose>
+                          <xsl:when test=".//div[@class='meta']//strong/text()[contains(.,'Leverans')]">
+                                  <xsl:value-of select=".//div[@class='meta']//strong/text()[contains(.,'Leverans')]"/>
+                          </xsl:when>
+                          <xsl:otherwise>
+                                  <xsl:value-of select=".//div[@class='categories lineheight30']//strong/text()[contains(.,'Leveringstid')]"/>
+                          </xsl:otherwise>
+                       </xsl:choose>
+             </engine:bind>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   </Price>
+       <engine:bind name="SPRICE">
+                <engine:applyFilter name="filter0">
+                      <xsl:value-of select=".//span[@class='price']/span/text()"/>
+               </engine:applyFilter>
+              </engine:bind>
+
+            <engine:bind name="SCOST">
+              <engine:applyFilter name="filter1">
+                <xsl:value-of select="engine:matches('kr.(.*).-', //div[@id='freight']/p/text()[contains(.,'fragt ved køb over')])"/>
+             </engine:applyFilter>
+            </engine:bind>
+
+              <xsl:variable name="delivery"><xsl:value-of select="engine:insert('dtime')"/></xsl:variable>
+
+              <ShippingOption>
+                  <xsl:if test="contains($delivery, '-')">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeMin Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)[\s]?-[\s]?\d+', $delivery)"/>
+                          </LeadTimeMin>
+                          <LeadTimeMax Unit="days">
+                              <xsl:value-of select="engine:matches('\d+[\s]?-[\s]?(\d+)', $delivery)"/>
+                          </LeadTimeMax>
+                      </LeadTime>
+                  </xsl:if>
+                  <xsl:if test="not(contains($delivery, '-')) and $delivery!=''">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeExact Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)',$delivery)"/>
+                          </LeadTimeExact>
+                      </LeadTime>
+                    </xsl:if>
+
+                    
+           <ShippingCost Currency="DKK">
+
+            <xsl:if test="number(engine:matches('(^\d+)', engine:insert('SPRICE')))>number(engine:insert('SCOST'))">
+                     <xsl:value-of select="number(00.00)"/>
+                   </xsl:if>          
+            </ShippingCost> 
+              </ShippingOption>
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+ <engine:bind name="SPRICE">
+                 <engine:applyFilter name="filter1">
+                      <xsl:value-of select=".//span[@class='woocommerce-Price-amount amount'][not(parent::del)]/text()"/>
+                  </engine:applyFilter>
+             </engine:bind>
+
+         <engine:bind name="SCOST">
+              <engine:applyFilter name="filter1">
+                      <xsl:value-of select="engine:matches('\d+', //div[contains(@class,'et_pb_text_inner')]/h2//text()[contains(.,'Fri Frakt Inom Sveri')])"/>
+   <engine:debug>***Found  SCOST<xsl:value-of select="engine:matches('\d+', //div[contains(@class,'et_pb_text_inner')]/h2//text()[contains(.,'Fri Frakt Inom Sveri')])"/>
+</engine:debug>      et_pb_text_inner
+   <engine:debug>***Found  SCOST<xsl:value-of select="engine:matches('\d+', //div[@class='et_pb_row et_pb_row_2']//text())"/>
+</engine:debug>             
+       
+</engine:applyFilter>
+           </engine:bind>
+
+                         
+              <xsl:variable name="delivery"><xsl:value-of select="//div[contains(@class,'et_pb_text_inner')]/h2//text()[contains(.,'Snabb Leverans:')]"/></xsl:variable>
+ <engine:debug> ***************<xsl:value-of select="//div[contains(@class,'et_pb_text_inner')]/h2//text()[contains(.,'Snabb Leverans:')]"/> </engine:debug>
+              <ShippingOption>
+                  <xsl:if test="contains($delivery, '-')">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeMin Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)[\s]?-[\s]?\d+', $delivery)"/>
+                          </LeadTimeMin>
+                          <LeadTimeMax Unit="days">
+                              <xsl:value-of select="engine:matches('\d+[\s]?-[\s]?(\d+)', $delivery)"/>
+                          </LeadTimeMax>
+                      </LeadTime>
+                  </xsl:if>
+                  <xsl:if test="not(contains($delivery, '-')) and $delivery!=''">
+                      <LeadTime From="order" To="delivery">
+                          <LeadTimeExact Unit="days">
+                              <xsl:value-of select="engine:matches('(\d+)',$delivery)"/>
+                          </LeadTimeExact>
+                      </LeadTime>
+                    </xsl:if>
+                    <ShippingCost Currency="SEK">
+                      <xsl:if test="number(engine:matches('(^\d+)', engine:insert('SPRICE')))>number(engine:insert('SCOST'))">
+                      <xsl:value-of select="number(00.00)"/>
+                   </xsl:if>
+                    </ShippingCost>
+              </ShippingOption>
+
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++
+ <xsl:when test="//ul[@itemtype='http://schema.org/BreadcrumbList']/li[position()!=last() and position()!=last()-1][position()&gt;4]/a/span">
+         <engine:replace p=" - $" r="">
+            <xsl:for-each select="//ul[@itemtype='http://schema.org/BreadcrumbList']/li[position()!=last() and position()!=last()-1][position()&gt;4]/a/span">
+            <xsl:value-of select="concat(., ' - ')"/>
+           </xsl:for-each>
+         </engine:replace>
+      </xsl:when>
+++++++++++++++++++++++++++++++++++++++++++++++++++++
